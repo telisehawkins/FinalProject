@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Mini Golf Game</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background: #2e7d32;
+    color: white;
+    margin: 0;
+}
+
+/* NAVBAR */
+.navbar {
+    position: fixed;
+    top: 0;
+    right: 20px;
+    display: flex;
+    gap: 20px;
+    padding: 15px;
+}
+
+.navbar a {
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    padding: 6px 10px;
+    border-radius: 5px;
+    background: rgba(0,0,0,0.2);
+}
+
+.navbar a:hover {
+    background: rgba(0,0,0,0.5);
+}
+
+/* PUSH CONTENT DOWN so navbar doesn't cover */
+.content {
+    margin-top: 70px;
+}
+
+/* GAME */
+#course {
+    width: 600px;
+    height: 300px;
+    margin: 20px auto;
+    background: #4caf50;
+    position: relative;
+    border-radius: 10px;
+    border: 3px solid #1b5e20;
+}
+
+#hole {
+    width: 20px;
+    height: 20px;
+    background: black;
+    border-radius: 50%;
+    position: absolute;
+}
+
+#ball {
+    width: 18px;
+    height: 18px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+}
+
+#arrow {
+    position: absolute;
+    font-size: 30px;
+    transform: translate(-50%, -50%);
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 18px;
+    margin-top: 10px;
+    cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+    <a href="../index.html">Home</a>
+    <a href="../about.html">Resume</a>
+    <a href="../fromscratch.html">Music</a>
+    
+</div>
+
+<div class="content">
+<h1>Mini Golf</h1>
+<p>Click swing when arrow points toward the hole</p>
+
+<div id="course">
+    <div id="hole"></div>
+    <div id="ball"></div>
+    <div id="arrow">→</div>
+</div>
+
+<button onclick="swing()">Swing</button>
+
+<p>Swings: <span id="swings">0</span></p>
+<p id="message"></p>
+</div>
+
+<script>
+let directions = ["→","↘","↓","↙","←","↖","↑","↗"];
+let current = 0;
+let swings = 0;
+let gameOver = false;
+
+let ballX = 300;
+let ballY = 150;
+
+let holeX = 450;
+let holeY = 150;
+
+let distance = 120;
+
+function updatePositions(){
+    document.getElementById("ball").style.left = ballX + "px";
+    document.getElementById("ball").style.top = ballY + "px";
+
+    document.getElementById("hole").style.left = holeX + "px";
+    document.getElementById("hole").style.top = holeY + "px";
+
+    document.getElementById("arrow").style.left = ballX + "px";
+    document.getElementById("arrow").style.top = (ballY - 25) + "px";
+}
+
+function rotateArrow(){
+    if(gameOver) return;
+    current = (current + 1) % directions.length;
+    document.getElementById("arrow").textContent = directions[current];
+}
+setInterval(rotateArrow, 250);
+
+function setHolePosition(index){
+    let angle = (index * Math.PI) / 4;
+    holeX = ballX + Math.cos(angle) * distance;
+    holeY = ballY + Math.sin(angle) * distance;
+}
+
+function isCorrectDirection(){
+    let dx = holeX - ballX;
+    let dy = holeY - ballY;
+
+    let angle = Math.atan2(dy, dx);
+    let deg = angle * (180 / Math.PI);
+
+    if(deg >= -22.5 && deg < 22.5) return "→";
+    if(deg >= 22.5 && deg < 67.5) return "↘";
+    if(deg >= 67.5 && deg < 112.5) return "↓";
+    if(deg >= 112.5 && deg < 157.5) return "↙";
+    if(deg >= 157.5 || deg < -157.5) return "←";
+    if(deg >= -157.5 && deg < -112.5) return "↖";
+    if(deg >= -112.5 && deg < -67.5) return "↑";
+    if(deg >= -67.5 && deg < -22.5) return "↗";
+}
+
+function swing(){
+    if(gameOver) return;
+
+    swings++;
+    document.getElementById("swings").textContent = swings;
+
+    let correct = isCorrectDirection();
+
+    if(directions[current] === correct){
+        ballX = holeX;
+        ballY = holeY;
+        updatePositions();
+
+        document.getElementById("message").textContent = "Nice shot! New hole...";
+        gameOver = true;
+
+        setTimeout(newHole, 1000);
+    } else {
+        document.getElementById("message").textContent = "Miss! Try again.";
+    }
+}
+
+function newHole(){
+    ballX = 300;
+    ballY = 150;
+
+    let randomDirection = Math.floor(Math.random() * 8);
+    setHolePosition(randomDirection);
+
+    gameOver = false;
+    document.getElementById("message").textContent = "";
+
+    updatePositions();
+}
+
+newHole();
+</script>
+
+</body>
+</html>
